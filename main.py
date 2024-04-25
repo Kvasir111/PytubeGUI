@@ -7,7 +7,7 @@ from pytube import YouTube
 def startDownload():
     try: 
         ytlink = url.get()
-        ytObj = YouTube(ytlink)
+        ytObj = YouTube(ytlink, on_progress_callback=on_progress)
         vid = ytObj.streams.get_highest_resolution()
         title.configure(text=ytObj.title, text_color="white")
         finishedLabel.configure(text="")
@@ -17,6 +17,18 @@ def startDownload():
         finishedLabel.configure(text="Something went wrong, check the link and Try again...🤷‍♂️", text_color="red")
     #print("Download Complete 🥳")
     finishedLabel.configure(text="Download Complete 🥳", text_color="green")
+
+def on_progress(stream, chunk, bytes_remaining):
+    # Updating Progress % label
+    totalVideoSize = stream.filesize
+    bytes_downloaded = totalVideoSize - bytes_remaining
+    percentageOfCompletion = bytes_downloaded / totalVideoSize * 100
+    per = str(int(percentageOfCompletion))
+    progress.configure(text=per + "%")
+    progress.update()
+
+    # Updating Progress Bar
+    progressBar.set(float(percentageOfCompletion/100))
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -43,6 +55,12 @@ download.pack(padx=10, pady=10)
 finishedLabel = customtkinter.CTkLabel(app, text="")
 finishedLabel.pack()
 
+# Progress
+progress =  customtkinter.CTkLabel(app, text="")
+progress.pack()
+progressBar = customtkinter.CTkProgressBar(app, width=400)
+progressBar.set(0)
+progressBar.pack()
 
 #keep-alive
 app.mainloop()
